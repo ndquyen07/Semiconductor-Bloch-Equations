@@ -1,8 +1,8 @@
 import numpy as np
 
 def save_results(solver):
-        np.savetxt('data/fn.dat', np.column_stack((solver.t, solver.f_n.T)), delimiter='\t')
-        np.savetxt('data/pn.dat', np.column_stack((solver.t, solver.p_n.real.T, solver.p_n.imag.T)), delimiter='\t')
+        np.savetxt('data/fn.dat', np.column_stack((solver.t[:, np.newaxis], solver.f_n)), delimiter='\t')
+        np.savetxt('data/pn.dat', np.column_stack((solver.t[:, np.newaxis], solver.p_n.real, solver.p_n.imag)), delimiter='\t')
         np.savetxt('data/population.dat', np.column_stack((solver.t, solver.population)), fmt="%.2f", delimiter='\t')
         np.savetxt('data/polarization.dat', np.column_stack((solver.t, solver.polarization.real, solver.polarization.imag)), delimiter='\t')
         np.savetxt('data/absorption_spectrum.dat', np.column_stack((solver.spectrum_energy, solver.absorption_spectrum)), delimiter='\t')

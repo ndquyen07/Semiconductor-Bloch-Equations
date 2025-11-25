@@ -11,12 +11,12 @@ import numpy as np
 hbar = 658.5  # meV·fs 
 
 # Laser parameters
-chi0_values = [1.0]   # Coupling strength values to scan 
+chi0_values = [0.1]   # Coupling strength values to scan 
 delta_t = 25.0         # fs (laser pulse width)
 Delta_0 = 30.0         # meV (detuning - transition energy)
 
 # Time parameters
-dt = 1.0                 # fs (time step)
+dt = 2.0                 # fs (time step)
 t_max = 1000.0          # fs (maximum time)
 t_0 = -3 * delta_t       # fs (initial time)
 
@@ -35,7 +35,6 @@ E_R = 4.2                 # meV (Rydberg energy)
 V = 1.0                   # cm³ (normalization volume)
 a0 = 1.25e-6              # cm (Bohr radius)    
 C0 = V * Delta_epsilon**(3/2) / (2 * np.pi**2 * a0**3 * E_R**(3/2))
-# C0 = 1.0e-6
 
 
 # Default parameter dictionary for SBESolver

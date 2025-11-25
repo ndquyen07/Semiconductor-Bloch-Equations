@@ -19,7 +19,7 @@ def plot_requested_plots(solver):
     ax1 = axes[0, 0]
     colors = plt.cm.tab10(np.linspace(0, 1, 5))
     for i in range(min(5, N)):
-        ax1.plot(t, f_n[i, :], label=f'f_{i+1}', color=colors[i], linewidth=2)
+        ax1.plot(t, f_n[:, i], label=f'f_{i+1}', color=colors[i], linewidth=2)
     ax1.set_xlabel('Time (fs)')
     ax1.set_ylabel('f_n')
     ax1.set_title('f_n vs t (first 5 levels)')
@@ -30,8 +30,8 @@ def plot_requested_plots(solver):
     ax2 = axes[0, 1]
     colors = plt.cm.viridis(np.linspace(0, 1, min(1, N)))
     for i in range(min(1, N)):
-        ax2.plot(t, p_n[i, :].real, label=f'Re(p_{i+1})', color=colors[i], linestyle='-')
-        ax2.plot(t, p_n[i, :].imag, label=f'Im(p_{i+1})', color=colors[i], linestyle='--')
+        ax2.plot(t, p_n[:, i].real, label=f'Re(p_{i+1})', color=colors[i], linestyle='-')
+        ax2.plot(t, p_n[:, i].imag, label=f'Im(p_{i+1})', color=colors[i], linestyle='--')
     ax2.set_xlabel('Time (fs)')
     ax2.set_ylabel('p_n')
     ax2.set_title('p_n vs t')
@@ -72,7 +72,6 @@ def plot_requested_plots(solver):
     ax6.set_ylabel('α(ω)')
     ax6.set_title('α vs Energy')
     ax6.grid(True, alpha=0.3)
-    ax6.axvline(solver.Delta_0, color='r', linestyle='--', alpha=0.5, label=f'Δ₀={solver.Delta_0:.1f} meV')
     ax6.legend()
     
     plt.tight_layout()
@@ -93,7 +92,6 @@ def plot_absorption_comparison(solver_with, solver_without):
     ax.set_ylabel('Absorption α(ω)', fontsize=12)
     ax.set_title('Absorption Spectrum: With vs Without Coulomb Interactions', fontsize=14, fontweight='bold')
     ax.grid(True, alpha=0.3)
-    ax.axvline(solver_with.Delta_0, color='k', linestyle='--', alpha=0.5, label=f'Δ₀={solver_with.Delta_0:.1f} meV')
     ax.legend()
     
     plt.tight_layout()

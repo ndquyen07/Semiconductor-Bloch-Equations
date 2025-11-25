@@ -5,7 +5,7 @@ RK4 (Runge-Kutta 4th order) ODE solver.
 import numpy as np
 
 
-def rk4_solve(func, t_span, y0, t_eval):
+def rk4_solve(func, y0, t_eval):
     """
     Solve ODE using RK4 method.
     
@@ -13,8 +13,8 @@ def rk4_solve(func, t_span, y0, t_eval):
     """
     n_points = len(t_eval)
     n_vars = len(y0)
-    y_solution = np.zeros((n_vars, n_points))
-    y_solution[:, 0] = y0
+    y_solution = np.zeros((n_points, n_vars))
+    y_solution[0, :] = y0
     
     t = t_eval[0]
     y = y0.copy()
@@ -28,7 +28,7 @@ def rk4_solve(func, t_span, y0, t_eval):
         k4 = func(t + dt, y + dt*k3)
         
         y = y + (dt/6.0) * (k1 + 2*k2 + 2*k3 + k4)
-        y_solution[:, i] = y
+        y_solution[i, :] = y
         t = t_eval[i]
     
     return {

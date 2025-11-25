@@ -3,7 +3,7 @@ Core solver for Semiconductor Bloch Equations.
 """
 
 import numpy as np
-from .rk4_solver import rk4_solve
+from src.rk4_solver import rk4_solve
 
 class SBESolver:
     """
@@ -60,14 +60,14 @@ class SBESolver:
         np.fill_diagonal(g_matrix, 0.0)
         
         return g_matrix
-    
+
 
     def coulomb_energy(self, f_levels):
         """
         Compute energy E_n
         """
-        prefactor = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon
-        E_n_array = prefactor * (self.g_matrix @ (2.0 * f_levels))
+
+        E_n_array = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * np.sum(self.g_matrix, axis=1) * (2.0 * f_levels)
         
         return E_n_array
     
@@ -92,13 +92,9 @@ class SBESolver:
         Returns array of Ω_n^R values for n=1..N
         
         """
-        prefactor = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon
-        
-        coulomb_term = prefactor * (self.g_matrix @ p_levels)
-        
-        # Laser pulse is same for all levels
         pulse = self.laser_pulse(t)
-        
+        coulomb_term = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * np.sum(self.g_matrix, axis=1) * p_levels
+
         if self.with_coulomb:
             Omega_R_array = (1.0 / self.hbar) * (pulse + coulomb_term)
         else:
@@ -115,12 +111,12 @@ class SBESolver:
 
         # Extract state variables
         f_n = y[:self.N]
-        p_n = y[self.N:2*self.N] + 1j * y[2*self.N:3*self.N]
+        p_n = y[self.N : 2*self.N] + 1j * y[2*self.N : 3*self.N]
 
 
         # Compute current population and time-dependent T2
-        # population = self.C0 * np.sum(np.sqrt(np.arange(1, self.N+1)) * f_n)
-        # T2_current = self.compute_T2(population)
+        population = self.C0 * np.sum(np.sqrt(np.arange(1, self.N+1)) * f_n)
+        T2_current = self.compute_T2(population)
 
         if self.with_coulomb:
             E_n_array = self.coulomb_energy(f_n)
@@ -135,11 +131,7 @@ class SBESolver:
         
         n_array = np.arange(1, self.N + 1)
         detuning = n_array * self.Delta_epsilon - self.Delta_0 - E_n_array
-        
-
-        dpdt = ((-1j / self.hbar) * detuning * p_n + 
-                1j * (1.0 - 2.0 * f_n) * Omega_R_array - 
-                p_n / self.T2)
+        dpdt = (-1j / self.hbar) * detuning * p_n + 1j * (1.0 - 2.0 * f_n) * Omega_R_array - p_n / T2_current
         
         return np.concatenate([dfdt, dpdt.real, dpdt.imag])
 
@@ -164,90 +156,52 @@ class SBESolver:
         # Precompute coupling matrix
         self.g_matrix = self.precompute_g_matrix()
 
-        
+        # Initial conditions: all populations and polarizations zero
         y0 = np.zeros(3 * self.N)
 
         # Time grid
         t_points = int((self.t_max - self.t_0) / self.dt) + 1
-        t_span = (self.t_0, self.t_max)
         t_eval = np.linspace(self.t_0, self.t_max, t_points)
         
-
         # Solve the SBEs using RK4
-        solution = rk4_solve(
-            self.derivatives,
-            t_span,
-            y0,
-            t_eval=t_eval
-        )
+        solution = rk4_solve(self.derivatives, y0, t_eval)
         
-
         # Extract results
         self.t = solution['t']
-        self.f_n = solution['y'][:self.N, :]
-        self.p_n = solution['y'][self.N:2*self.N, :] + 1j * solution['y'][2*self.N:3*self.N, :]
+        self.f_n = solution['y'][:, :self.N]
+        self.p_n = solution['y'][:, self.N:2*self.N] + 1j * solution['y'][:, 2*self.N:3*self.N]
 
 
         # Compute observables   
-        self.population = self.C0 * np.sum(np.sqrt(np.arange(1, self.N+1))[:, np.newaxis] * self.f_n, axis=0)
-        self.polarization = 0.5 * self.C0 * np.sum(np.sqrt(np.arange(1, self.N+1))[:, np.newaxis] * self.p_n, axis=0)
-        
-        # Compute absorption spectrum
-        # self.T2_t = self.compute_T2(self.population)
-        
+        self.population = self.C0 * np.sum(np.sqrt(np.arange(1, self.N+1)) * self.f_n, axis=1)
+        self.polarization = 0.5 * self.C0 * np.sum(np.sqrt(np.arange(1, self.N+1)) * self.p_n, axis=1)
+
         # Compute Fourier transform for absorption spectrum
         self.compute_absorption_spectrum()
     
 
 
-    def compute_absorption_spectrum(self):
-        """
-        Compute the absorption spectrum from the time-dependent polarization.
-        Absorption is proportional to Im[χ(ω)] = Im[P(ω)/E(ω)].
-        """
-        from scipy.fft import fft, fftfreq
-        
-        # Use FFT with proper normalization
+    def fourier_transform(self, signal):
         N = len(self.t)
+        omega = np.linspace(-50, 50, 100)
         
-        # Compute frequency grid
-        freqs = fftfreq(N, self.dt)  # in 1/fs
-        # Convert to energy in meV: E = ℏω = ℏ(2πf)
-        energies = self.hbar * 2.0 * np.pi * freqs
+        omega_grid, t_grid = np.meshgrid(omega, self.t, indexing='ij')
         
-        # Only keep positive frequencies
-        pos_mask = (energies > 0) & (energies < 500)  # Focus on 0-150 meV
+        signal_fft = self.dt * np.sum(signal * np.exp(1j * self.hbar * omega_grid * t_grid), axis=1)
         
-        # Apply window to reduce spectral leakage
-        window = np.blackman(N)
-        
-        # Compute FFT with window
-        P_fft = fft(self.polarization)
-        E_array = np.array([self.laser_pulse(ti) for ti in self.t])
-        E_fft = fft(E_array)
-        
-        # Extract positive frequencies
-        P_fft_pos = P_fft[pos_mask]
-        E_fft_pos = E_fft[pos_mask]
-        energies_pos = energies[pos_mask]
-        
-        # Safe division with threshold
-        E_max = np.max(np.abs(E_fft_pos))
-        threshold = 1e-4 * E_max
-        safe = np.abs(E_fft_pos) > threshold
-        
-        # Compute susceptibility and absorption
-        chi = np.zeros_like(P_fft_pos, dtype=complex)
-        chi[safe] = P_fft_pos[safe] / E_fft_pos[safe]
-        
-        # Absorption: Im[χ(ω)]
-        alpha = np.imag(chi)
-        
-        self.spectrum_energy = energies_pos
-        self.absorption_spectrum = alpha
+        return omega, signal_fft
 
-        
- 
+    
+
+    def compute_absorption_spectrum(self):
+        omega, P_omega =  self.fourier_transform(self.polarization)
+        _, E_omega = self.fourier_transform(self.laser_pulse(self.t))
+
+
+        self.spectrum_energy = omega * self.hbar
+        self.absorption_spectrum = np.imag(P_omega / E_omega)
+
+    
 
     def extract_results(self):
         """
@@ -257,4 +211,19 @@ class SBESolver:
 
 
     
+if __name__ == "__main__":
+    import numpy as np
+
+    n = np.array([1, 3, 2])
+    n1 = np.array([1, 2, 3])
+    print(n.reshape(-1, 1) * n1)
+    print(np.sum(n.reshape(-1, 1) * n1, axis=1))
+
+
+    # print("n_grid:\n", n_grid)
+    # print("n1_grid:\n", n1_grid)
+
+
+
+
 

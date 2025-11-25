@@ -67,9 +67,11 @@ class SBESolver:
         Compute energy E_n
         """
 
-        E_n_array = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * np.sum(self.g_matrix, axis=1) * (2.0 * f_levels)
+        E_n_array = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * (self.g_matrix @ (2.0 * f_levels))
         
         return E_n_array
+    
+        
     
 
     def laser_pulse(self, t):
@@ -93,7 +95,7 @@ class SBESolver:
         
         """
         pulse = self.laser_pulse(t)
-        coulomb_term = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * np.sum(self.g_matrix, axis=1) * p_levels
+        coulomb_term = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * self.g_matrix @ p_levels
 
         if self.with_coulomb:
             Omega_R_array = (1.0 / self.hbar) * (pulse + coulomb_term)

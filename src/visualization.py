@@ -67,8 +67,7 @@ def plot_requested_plots(solver):
     
     # 6. α follow energy
     ax6 = axes[2, 1]
-    mask = (solver.spectrum_energy > -50) & (solver.spectrum_energy < 50)
-    ax6.plot(solver.spectrum_energy[mask], solver.absorption_spectrum[mask], 'b-', linewidth=2)
+    ax6.plot(solver.spectrum_energy, solver.absorption_spectrum, 'b-', linewidth=2)
     ax6.set_xlabel('Energy (meV)')
     ax6.set_ylabel('α(ω)')
     ax6.set_title('α vs Energy')
@@ -85,9 +84,8 @@ def plot_absorption_comparison(solver_with, solver_without):
     Plot comparison of absorption spectra with and without Coulomb interactions.
     """
     fig, ax = plt.subplots(figsize=(10, 6))
-    mask = (solver_with.spectrum_energy > -50) & (solver_with.spectrum_energy < 50)
-    ax.plot(solver_with.spectrum_energy[mask], solver_with.absorption_spectrum[mask], 'b-', linewidth=2, label='With Coulomb')
-    ax.plot(solver_without.spectrum_energy[mask], solver_without.absorption_spectrum[mask], 'r--', linewidth=2, label='Without Coulomb')
+    ax.plot(solver_with.spectrum_energy, solver_with.absorption_spectrum, 'b-', linewidth=2, label='With Coulomb')
+    ax.plot(solver_without.spectrum_energy, solver_without.absorption_spectrum, 'r--', linewidth=2, label='Without Coulomb')
     
     ax.set_xlabel('Energy (meV)', fontsize=12)
     ax.set_ylabel('Absorption α(ω)', fontsize=12)

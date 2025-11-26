@@ -19,9 +19,8 @@ def main():
     delta_t = PARAMS['delta_t']
     Delta_0 = PARAMS['Delta_0']
     E_R = PARAMS['E_R']
-    T2 = PARAMS['T2']                    # Constant dephasing time
-    T2_0 = PARAMS['T2_0']                # Initial dephasing time
-    gamma = PARAMS['gamma']              # Scattering coefficient
+    T2_0 = PARAMS['T2_0']                
+    gamma = PARAMS['gamma']              
     hbar = PARAMS['hbar']
     N = PARAMS['N']
     Delta_epsilon = PARAMS['Delta_epsilon']
@@ -40,7 +39,6 @@ def main():
         delta_t=delta_t,
         Delta_0=Delta_0,
         E_R=E_R,
-        T2=T2,
         T2_0=T2_0,      
         gamma=gamma,
         hbar=hbar,
@@ -58,7 +56,6 @@ def main():
         delta_t=delta_t,
         Delta_0=Delta_0,
         E_R=E_R,
-        T2=T2,
         T2_0=T2_0,      
         gamma=gamma,
         hbar=hbar,

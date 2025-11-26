@@ -18,7 +18,6 @@ class SBESolver:
         self.delta_t = None
         self.Delta_0 = None
         self.E_R = None
-        self.T2 = None
         self.T2_0 = None                     # Initial dephasing time
         self.gamma = None                    # Scattering coefficient
         self.hbar = None
@@ -138,12 +137,11 @@ class SBESolver:
         return np.concatenate([dfdt, dpdt.real, dpdt.imag])
 
 
-    def fit(self, chi_0, delta_t, Delta_0, E_R, T2, T2_0, gamma, hbar, N, Delta_epsilon, t_0, t_max, dt, C_0, with_coulomb=True):
+    def fit(self, chi_0, delta_t, Delta_0, E_R, T2_0, gamma, hbar, N, Delta_epsilon, t_0, t_max, dt, C_0, with_coulomb=True):
         self.chi_0 = chi_0
         self.delta_t = delta_t
         self.Delta_0 = Delta_0
         self.E_R = E_R
-        self.T2 = T2
         self.T2_0 = T2_0    
         self.gamma = gamma  
         self.hbar = hbar
@@ -185,25 +183,23 @@ class SBESolver:
 
     def fourier_transform(self, signal):
         N = len(self.t)
-        omega = np.linspace(-200, 200, N)
+        omega = np.linspace(-100, 100, N)
         
         omega_grid, t_grid = np.meshgrid(omega, self.t, indexing='ij')
         
-        signal_fft = self.dt * np.sum(signal * np.exp(1j/self.hbar * omega_grid * t_grid), axis=1)
+        signal_fft = self.dt * np.sum(signal * np.exp(1j / self.hbar * omega_grid * t_grid), axis=1)
         
         return omega, signal_fft
-
 
 
     def compute_absorption_spectrum(self):
         omega, P_omega =  self.fourier_transform(self.polarization)
         _, E_omega = self.fourier_transform(self.laser_pulse(self.t))
 
-
         self.spectrum_energy = omega
         self.absorption_spectrum = np.imag(P_omega / E_omega)
 
-    
+
 
     def extract_results(self):
         """

@@ -77,7 +77,7 @@ class SBESolver:
     def laser_pulse(self, t):
         """Gaussian laser pulse.
         """
-        return 0.5 * (self.hbar * np.sqrt(np.pi) / self.delta_t) * self.chi_0 * np.exp(-t**2 / self.delta_t**2)
+        return 0.5 * (np.sqrt(np.pi) / self.delta_t) * self.chi_0 * np.exp(-t**2 / self.delta_t**2)
     
 
     def compute_T2(self, population):
@@ -95,12 +95,12 @@ class SBESolver:
         
         """
         pulse = self.laser_pulse(t)
-        coulomb_term = (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * self.g_matrix @ p_levels
+        coulomb_term = (1.0 / self.hbar) * (np.sqrt(self.E_R) / np.pi) * self.Delta_epsilon * self.g_matrix @ p_levels
 
         if self.with_coulomb:
-            Omega_R_array = (1.0 / self.hbar) * (pulse + coulomb_term)
+            Omega_R_array = pulse + coulomb_term
         else:
-            Omega_R_array = (1.0 / self.hbar) * pulse
+            Omega_R_array = pulse
         
         return Omega_R_array
     
@@ -185,22 +185,22 @@ class SBESolver:
 
     def fourier_transform(self, signal):
         N = len(self.t)
-        omega = np.linspace(-50, 50, 100)
+        omega = np.linspace(-200, 200, N)
         
         omega_grid, t_grid = np.meshgrid(omega, self.t, indexing='ij')
         
-        signal_fft = self.dt * np.sum(signal * np.exp(1j * self.hbar * omega_grid * t_grid), axis=1)
+        signal_fft = self.dt * np.sum(signal * np.exp(1j/self.hbar * omega_grid * t_grid), axis=1)
         
         return omega, signal_fft
 
-    
+
 
     def compute_absorption_spectrum(self):
         omega, P_omega =  self.fourier_transform(self.polarization)
         _, E_omega = self.fourier_transform(self.laser_pulse(self.t))
 
 
-        self.spectrum_energy = omega * self.hbar
+        self.spectrum_energy = omega
         self.absorption_spectrum = np.imag(P_omega / E_omega)
 
     

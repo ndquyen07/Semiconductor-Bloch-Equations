@@ -11,7 +11,7 @@ import numpy as np
 hbar = 658.5  # meV·fs 
 
 # Laser parameters
-chi0_values = [0.1]   # Coupling strength values to scan 
+chi0_values = [0.0001]   # Coupling strength values to scan 
 delta_t = 25.0         # fs (laser pulse width)
 Delta_0 = 30.0         # meV (detuning - transition energy)
 
@@ -54,5 +54,4 @@ PARAMS = {
     'dt': dt,
     'C_0': C0,
 }
-
 

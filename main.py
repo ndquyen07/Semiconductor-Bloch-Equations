@@ -12,7 +12,7 @@ from src.visualization import plot_requested_plots, plot_absorption_comparison
 
 
 def main():
-    """Main function to set up and solve the multi-level SBE."""
+    """Main function to set up and solve the multi-level SBE for GaAs."""
     
     # Get parameters from params.py
     chi_0 = PARAMS['chi_0']

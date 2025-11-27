@@ -259,11 +259,4 @@ This implementation is based on the multi-level SBE formalism for modeling ultra
 3. **Schäfer, W., & Wegener, M.** (2002). *Semiconductor Optics and Transport Phenomena*. Springer.
 4. **Lindberg, M., & Koch, S. W.** (1988). Effective Bloch equations for semiconductors. *Physical Review B*, 38(5), 3342.
 
-## License
 
-MIT License
-
-## Author
-
-Nguyen Dinh Quyen  
-Vietnam National University - Ho Chi Minh City University of Science

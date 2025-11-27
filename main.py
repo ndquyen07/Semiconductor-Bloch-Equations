@@ -9,6 +9,7 @@ from src.sbe_solver import SBESolver
 from src.params import PARAMS
 from src.utils import save_results, save_absorption_comparison
 from src.visualization import plot_requested_plots, plot_absorption_comparison
+import time
 
 
 def main():
@@ -33,6 +34,7 @@ def main():
     solver1 = SBESolver()
     solver2 = SBESolver()
     
+    start_time = time.time()
     
     solver1.fit(
         chi_0=chi_0,
@@ -67,6 +69,9 @@ def main():
         C_0=C_0,
         with_coulomb=False
     )
+
+    end_time = time.time()
+    print(f"Execution time: {end_time - start_time} seconds")
     
 
     # Save solutions

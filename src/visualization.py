@@ -1,3 +1,4 @@
+from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -96,3 +97,40 @@ def plot_absorption_comparison(solver_with, solver_without):
     plt.tight_layout()
     plt.savefig('result/absorption_comparison.png', dpi=300, bbox_inches='tight')
     plt.show()
+
+
+def plot_population_3d(solver, title_suffix="", elev=10, azim=45):
+    """Plot 3D surface of carrier occupation f_n(n, t)"""
+    
+    # Create meshgrid
+    T, N_levels = np.meshgrid(solver.t, np.arange(1, solver.N + 1))
+    
+    # Transpose f_n to match meshgrid dimensions
+    F_n = solver.f_n.T
+    
+    # Create 3D plot
+    fig = plt.figure(figsize=(14, 10))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Surface plot
+    surf = ax.plot_surface(T, N_levels, F_n, cmap=cm.viridis, 
+                        linewidth=0, antialiased=True, alpha=0.9)
+    
+    # Labels and title
+    ax.set_xlabel('Time (fs)', fontsize=12, labelpad=10)
+    ax.set_ylabel('Energy Level n', fontsize=12, labelpad=10)
+    ax.set_zlabel('Occupation $f_n$', fontsize=12, labelpad=10)
+    ax.set_title(f'Carrier Occupation Dynamics: $f_n(n,t)$ {title_suffix}', 
+                fontsize=14, fontweight='bold', pad=20)
+    
+    # Colorbar
+    cbar = fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
+    cbar.set_label('$f_n$', fontsize=11)
+    
+    # View angle
+    ax.view_init(elev=elev, azim=azim)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return fig, ax

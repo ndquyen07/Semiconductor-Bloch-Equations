@@ -8,7 +8,7 @@ This script solves the multi-level SBEs using equations (0.5a) and (0.5b).
 from src.sbe_solver import SBESolver
 from src.params import PARAMS
 from src.utils import save_results, save_absorption_comparison
-from src.visualization import plot_requested_plots, plot_absorption_comparison
+from src.visualization import plot_requested_plots, plot_absorption_comparison, plot_population_3d
 import time
 
 
@@ -82,7 +82,7 @@ def main():
     # Plot results
     plot_requested_plots(solver1)
     plot_absorption_comparison(solver1, solver2)
-    
+    plot_population_3d(solver1)
 
 
 if __name__ == "__main__":
